@@ -26,7 +26,7 @@ Both accounts are collaborators on each other's repositories, so a plain `git pu
 | kannaka-staff | kannaka-labs | public | agentic radio staff |
 | kannaka-cannon | kannaka-labs | public | video editor and voice cloner |
 | kannaka-quantum | kannaka-labs | public | qBraid bridge and MCP server |
-| consciousness-core, kannaka-attention | NickFlach | public | physics engine, sparse attention |
+| consciousness-core, kannaka-attention | kannaka-labs | public | physics engine, sparse attention |
 | ghostsignals-rs | kannaka-labs | public | prediction-market engine |
 | 0xSCADA | kannaka-labs | public | decentralized SCADA, the QE citizen's home |
 | kannaka-library | NickFlach | public | this library and the manifest |
