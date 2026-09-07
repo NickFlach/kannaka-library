@@ -145,7 +145,7 @@ async function main() {
     installers: {
       sh: "https://github.com/kannaka-labs/kannaka-plugin/releases/latest/download/install.sh",
       ps1: "https://github.com/kannaka-labs/kannaka-plugin/releases/latest/download/install.ps1",
-      brew: "brew install NickFlach/kannaka/kannaka",
+      brew: "brew install kannaka-labs/kannaka/kannaka",
       claude_marketplace: "kannaka-labs/kannaka-constellation-marketplace",
     },
   };

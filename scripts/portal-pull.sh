@@ -24,12 +24,7 @@ set -eu
 # page while reporting success.
 PATH="/usr/sbin:/sbin:/usr/bin:/bin:$PATH"
 
-# Still NickFlach: this repository is the one the org move could not take,
-# because an earlier probe offered it to the flaukowski user account and that
-# pending offer blocks any further transfer until it is cancelled in a browser.
-# Pointing this at kannaka-labs before the move 404s — which the tarball check
-# caught, aborting before the live site was touched.
-REL="${LIBRARY_RELEASE:-https://github.com/NickFlach/kannaka-library/releases/download/library}"
+REL="${LIBRARY_RELEASE:-https://github.com/kannaka-labs/kannaka-library/releases/download/library}"
 WEB="${PORTAL_WEB:-/usr/share/nginx/ninja-portal}"
 WORK="${PORTAL_PULL_WORK:-/tmp/portal-pull}"
 PUB="${MANIFEST_PUB:-/etc/ninja-portal-manifest.pub}"
