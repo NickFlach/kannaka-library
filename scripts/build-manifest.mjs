@@ -82,7 +82,8 @@ function target(name) {
 async function brainSection(c) {
   let registry = {};
   try { registry = JSON.parse(readFileSync(join(ROOT, "brain", "registry.json"), "utf8")); } catch { /* none yet */ }
-  const b = { ...c, models: registry.models || [], registry_exported: registry.exported || null };
+  const b = { ...c, models: registry.models || [], registry_exported: registry.exported || null,
+    serving: registry.serving || null, reported_family: registry.reported_family || "kannaka-brain", judge_run: registry.judge_run || null };
   if (!offline && c.hosted?.models_url) {
     try {
       const r = await fetch(c.hosted.models_url, { headers: { "user-agent": "kannaka-library" } });
@@ -90,6 +91,36 @@ async function brainSection(c) {
     } catch (e) { log(`hosted brain unreachable: ${e.message}`); }
   }
   return b;
+}
+
+/**
+ * The manifest as tab-separated lines, for consumers with no JSON parser.
+ * Columns: kind, id, a, b, c, d — read per kind, documented in the header.
+ *   generated  <iso>
+ *   component  <id>  <version|->  <repo|->  <kind>
+ *   asset      <id>  <asset name>  <target|->  <url>  <sha256|->
+ *   brain      <tag>  <served_ppl|->  <judge_mean|->  <huggingface|->  <serving|->
+ *   hosted     brain  <base_url>  <online|offline>  <models csv>
+ *   service    <id>  <url>
+ *   install    <sh|ps1|brew>  <value>
+ */
+function tsvOf(m) {
+  const L = [];
+  const v = (x) => (x === null || x === undefined || x === "" ? "-" : String(x).replace(/[\t\r\n]/g, " "));
+  L.push(`# kannaka-constellation/1\tgenerated\t${m.generated}`);
+  L.push(`# columns: kind\tid\t...\tsee scripts/build-manifest.mjs`);
+  for (const c of m.components) {
+    L.push(["component", c.id, v(c.release?.version), v(c.repo), v(c.kind)].join("\t"));
+    for (const a of c.assets || []) L.push(["asset", c.id, v(a.name), v(a.target), v(a.url), v(a.sha256)].join("\t"));
+    if (c.kind === "model") {
+      for (const b of c.models || []) L.push(["brain", v(b.tag), v(b.served_ppl), v(b.judge_mean), v(b.huggingface), v(b.tag === (c.serving || "")) ].join("\t"));
+      if (c.hosted) L.push(["hosted", "brain", v(c.hosted.base_url), c.hosted.online ? "online" : "offline", v((c.hosted.models || []).join(","))].join("\t"));
+      if (c.local) L.push(["local", "brain", v(c.local.model), v(c.local.from)].join("\t"));
+    }
+  }
+  for (const s of m.services) L.push(["service", v(s.id), v(s.url)].join("\t"));
+  for (const [k, val] of Object.entries(m.installers)) L.push(["install", v(k), v(val)].join("\t"));
+  return L.join("\n") + "\n";
 }
 
 async function main() {
@@ -117,10 +148,16 @@ async function main() {
   mkdirSync(outDir, { recursive: true });
   const bytes = Buffer.from(JSON.stringify(manifest, null, 2) + "\n");
   writeFileSync(join(outDir, "constellation.json"), bytes);
+  // A shell cannot parse JSON without a dependency, and the installer is a
+  // POSIX sh script by design. The same facts go out as tab-separated lines so
+  // `awk` is the whole parser: kind, id, version, name, target, url, sha256.
+  const tsv = Buffer.from(tsvOf(manifest));
+  writeFileSync(join(outDir, "constellation.tsv"), tsv);
   const key = loadPrivateKey();
   if (key) {
     writeFileSync(join(outDir, "constellation.json.sig"), signBytes(bytes, key) + "\n");
-    log(`signed → ${join(outDir, "constellation.json")} (+ .sig)`);
+    writeFileSync(join(outDir, "constellation.tsv.sig"), signBytes(tsv, key) + "\n");
+    log(`signed → ${join(outDir, "constellation.json")} + .tsv (+ .sig each)`);
   } else {
     log(`UNSIGNED → ${join(outDir, "constellation.json")} (no MANIFEST_SIGNING_KEY / key file)`);
   }

@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -40,6 +40,23 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
+
+      # A tarball the portal can PULL. ninja-portal.com serves the library and
+      # the manifest from its own disk, and the installer's default manifest
+      # URL points there — so the portal must not depend on this workflow
+      # holding a key to its box. It publishes; buzz fetches on a timer.
+      - name: Pack the site for the portal
+        run: |
+          tar -czf library-site.tar.gz -C site .
+          sha256sum library-site.tar.gz > library-site.tar.gz.sha256
+          ls -la library-site.tar.gz
+
+      - name: Publish the rolling library release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete library --yes --cleanup-tag 2>/dev/null || true
+          gh release create library             --title "library (rolling)"             --notes "The built library and the signed manifest, republished on every build. Pulled by ninja-portal.com. Not a version — this tag always points at the latest build."             library-site.tar.gz library-site.tar.gz.sha256             dist/constellation.json dist/constellation.json.sig             dist/constellation.tsv dist/constellation.tsv.sig             manifest.pub
 
   deploy:
     needs: build
