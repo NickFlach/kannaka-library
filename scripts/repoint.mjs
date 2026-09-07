@@ -12,6 +12,7 @@
 // Deliberately narrow: only files whose content is executed or fetched, and
 // only repositories this checkout can see. Prose links in READMEs are left to
 // the redirect; rewriting every mention would bury the real changes in noise.
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
@@ -51,8 +52,26 @@ const TARGETS = [
 // name a model rather than a repository.
 const KEEP = /huggingface|hf\.co|"lora"|"from"/i;
 
+// Only rewrite a reference once the repository is ACTUALLY in the org. Doing
+// it ahead of the move points live URLs at a 404: the portal's puller was
+// repointed at kannaka-labs/kannaka-library while that repository was still
+// the one repo the move could not take, and the next pull aborted on a missing
+// tarball. Ask GitHub, and cache the answer per repository.
+const seen = new Map();
+function movedAlready(name) {
+  if (seen.has(name)) return seen.get(name);
+  let out = false;
+  try {
+    out = execFileSync("gh", ["api", `repos/${ORG}/${name}`, "--jq", ".owner.login"],
+      { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim() === ORG;
+  } catch { out = false; }
+  seen.set(name, out);
+  return out;
+}
+
 const OWNERS = /\b(NickFlach|flaukowski)\/([A-Za-z0-9._-]+)/g;
 let files = 0, edits = 0, missing = 0;
+const skipped = new Set();
 
 for (const [repo, rel, only] of TARGETS) {
   const p = join(ROOT, repo, rel);
@@ -64,6 +83,7 @@ for (const [repo, rel, only] of TARGETS) {
     return line.replace(OWNERS, (m, owner, name) => {
       if (only && !only.includes(`${owner}/${name}`)) return m;
       if (owner === ORG) return m;
+      if (!movedAlready(name)) { skipped.add(owner + "/" + name); return m; }
       n++;
       return `${ORG}/${name}`;
     });
@@ -80,4 +100,5 @@ for (const [repo, rel, only] of TARGETS) {
 }
 
 console.log(`\n${edits} references across ${files} files${missing ? `, ${missing} not in this checkout` : ""}.`);
+if (skipped.size) console.log(`left alone (not in ${ORG} yet): ${[...skipped].join(", ")}`);
 if (!APPLY) console.log("Dry run. Re-run with --apply to write, then commit each repository.");
