@@ -66,6 +66,13 @@ rm -rf "$WEB/library.old"
 [ -d "$WEB/library" ] && mv "$WEB/library" "$WEB/library.old"
 mv stage "$WEB/library"
 chmod -R a+rX "$WEB/library"
+chown -R "$(stat -c %u "$WEB"):$(stat -c %g "$WEB")" "$WEB/library" 2>/dev/null || true
+# SELinux: a tree that arrived via /tmp carries user_tmp_t, and nginx is
+# refused every file in it — a 403 on every library page with a correct-looking
+# directory listing on disk. Same trap as /usr/local/bin/nats. Relabel it.
+if command -v restorecon >/dev/null 2>&1; then
+  restorecon -RF "$WEB/library" >/dev/null 2>&1 || log "restorecon failed — expect 403s if SELinux is enforcing"
+fi
 for f in constellation.json constellation.json.sig constellation.tsv constellation.tsv.sig manifest.pub; do
   install -m 0644 "$f" "$WEB/$f"
 done
