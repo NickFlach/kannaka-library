@@ -48,10 +48,56 @@ Private repositories are listed so the map is complete. Their documents are not 
 
 ## The organisation move
 
-When the constellation moves to one GitHub organisation, the sequence is:
+The organisation is **`kannaka-labs`**. The name was free on GitHub and already
+reads as the constellation's institution rather than one of its products: the
+observatory's prediction registry files claims under Kannaka Labs today.
 
-1. create the organisation and add both accounts;
-2. transfer the public repositories first (GitHub redirects clone and release URLs, and the manifest builder follows the redirect);
-3. rebuild the manifest and confirm every asset hash still resolves;
-4. transfer the private repositories;
-5. update `sources.json` here to the new owner; nothing else has to change.
+`scripts/org-move.mjs` runs the move. It exists because a transfer is not one
+operation with one outcome, and the parts that matter are not all documented
+together.
+
+### What GitHub carries, and what it drops
+
+| | after a transfer |
+|---|---|
+| clone / fetch / push over HTTPS and SSH | redirected to the new owner |
+| release download URLs | redirected |
+| issues, pull requests, wiki, stars, watchers | carried |
+| **Actions secret values** | **cannot be read back through the API at all** |
+| GitHub Pages | the site URL changes owner |
+
+That fourth row is the whole reason this is done one repository at a time.
+Twelve secrets live across six repositories, and five of them are the macOS
+signing certificate and notary credentials in `kannaka-plugin`. A secret that
+does not survive a transfer must be typed in again by whoever holds the
+original, and nothing can read it out first to check.
+
+So the move measures instead of assuming. `--probe` records secrets,
+variables, environments, webhooks, Pages and stars, transfers one repository,
+reads all of it again, prints what was lost by name, and then tests every URL
+shape against the **old** address. It exits non-zero if anything did not
+survive.
+
+### The order
+
+1. **Create the organisation** at [github.com/organizations/plan](https://github.com/organizations/plan). This is the only step with no API on github.com; everything after it is scripted.
+2. **Probe** with `kannaka-library`: one secret whose value is held elsewhere, a Pages site, a release, and a live consumer in the portal's puller. If anything is going to break, it breaks on the least load-bearing repository in the estate.
+3. **Move the public repositories** (19), rebuild the manifest, and walk every asset URL in it.
+4. **Move the private ones** (6) — these carry live deployments, so they follow only once the public move is proven.
+5. **Repoint what hardcodes an owner.** `sources.json` is repointed by the script; the rest is small and known: the installers' `ReleaseRepo`/`TuiRepo` defaults, their `raw.githubusercontent.com` self-URL, the `kannaka-hdl` component they pin, `claude plugin marketplace add`, the manifest's own install URLs, and the Homebrew tap's formula.
+
+### Two accounts, one more step
+
+Five repositories belong to `flaukowski`, where the `NickFlach` token has push
+but **not admin** — and a transfer needs admin. That account's token does have
+it. A transfer into an organisation also requires the transferring account to
+be a member of it, so `flaukowski` has to be invited from the organisation's
+People page; `scripts/org-move.mjs --join` accepts the invitation on its
+behalf.
+
+### What the move does not touch
+
+The open weights live on **Hugging Face** under `flaukowski`, which is a
+different account system entirely. A GitHub organisation does not move them,
+the manifest links them by their full URL, and nothing in the installers
+resolves them through GitHub.
