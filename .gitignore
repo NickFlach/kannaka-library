@@ -1,0 +1,5 @@
+.cache/
+dist/
+site/
+node_modules/
+*.pem

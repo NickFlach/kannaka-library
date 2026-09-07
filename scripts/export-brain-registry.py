@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""Rebuild brain/registry.json from the lab box.
+
+Run ON the substrate host (debain2), where the served tags, the served-perplexity
+registry and the judge runs live:
+
+    python3 scripts/export-brain-registry.py > brain/registry.json
+
+Sources, all of them the trainer's own outputs, none of them hand-kept:
+  ollama list                       served tags and sizes
+  /srv/rogue/served-ppl.json        perplexity of each tag AS SERVED
+  ~/.kannaka-corpus/ab/*.json       controlled voice-judge grade runs
+  ~/.kannaka-brain-serve/           which tag the swarm node answers on
+Notes are preserved from the existing registry so the prose survives a rebuild.
+"""
+import json
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+ROGUE = Path(os.environ.get("ROGUE_ROOT", "/srv/rogue"))
+AB_DIR = Path(os.environ.get("ROGUE_JUDGE_DIR", os.path.expanduser("~/.kannaka-corpus/ab")))
+OLLAMA = os.environ.get("AB_OLLAMA", "http://172.18.0.1:11434")
+HERE = Path(__file__).resolve().parent.parent
+HF = {
+    "kannaka-brain-v1": "flaukowski/kannaka-brain-v1",
+    "kannaka-brain-v2": "flaukowski/kannaka-brain-v2",
+    "kannaka-brain-7b-v1": "flaukowski/kannaka-brain-7b-v1",
+}
+BASE = {"7b": "Qwen2.5-7B-Instruct"}
+
+
+def served() -> dict:
+    """tag -> size_gb, from the ollama the gateway actually calls."""
+    env = {**os.environ, "OLLAMA_HOST": OLLAMA.split("//")[-1]}
+    try:
+        out = subprocess.run(["ollama", "list"], capture_output=True, text=True, env=env, timeout=30).stdout
+    except Exception as e:  # noqa: BLE001 - report and continue with nothing
+        print(f"ollama list failed: {e}", file=sys.stderr)
+        return {}
+    tags = {}
+    for line in out.splitlines():
+        f = line.split()
+        if not f or not f[0].startswith("kannaka-brain"):
+            continue
+        tag = f[0].split(":")[0]
+        if tag in ("kannaka-brain-current", "kannaka-brain-serve"):
+            continue
+        size = None
+        if len(f) >= 4 and f[3].upper() == "GB":
+            try:
+                size = float(f[2])
+            except ValueError:
+                size = None
+        tags[tag] = size
+    return tags
+
+
+def judge() -> tuple[dict, str]:
+    """tag -> (mean, n) from the newest usable grade run, plus that run's name."""
+    best, run = {}, ""
+    files = sorted(list(AB_DIR.glob("*.json")) + list(Path(os.path.expanduser("~/.kannaka-corpus/runs")).glob("*/ab-judge.json")),
+                   key=lambda p: p.stat().st_mtime)
+    for f in files:
+        try:
+            d = json.loads(f.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        # A pairwise run cannot be compared across tags, and a run whose judge
+        # failed its own controls is not evidence about anything.
+        if d.get("mode") != "grade" or not (d.get("judge_check") or {}).get("judge_usable"):
+            continue
+        for tag, s in (d.get("scores_summary") or {}).items():
+            if tag.startswith("__") or s.get("mean") is None:
+                continue
+            best[tag] = (round(float(s["mean"]), 3), int(s.get("n") or 0))
+            run = f.stem
+    return best, run
+
+
+def main() -> int:
+    old = {}
+    reg_path = HERE / "brain" / "registry.json"
+    if reg_path.exists():
+        try:
+            old = {m["tag"]: m for m in json.loads(reg_path.read_text(encoding="utf-8")).get("models", [])}
+        except (OSError, ValueError):
+            old = {}
+    ppl = {}
+    p = ROGUE / "served-ppl.json"
+    if p.exists():
+        ppl = json.loads(p.read_text(encoding="utf-8"))
+    scores, run = judge()
+    tags = served()
+
+    models = []
+    for tag, size in sorted(tags.items(), key=lambda kv: (-(scores.get(kv[0], (0, 0))[0]), kv[0])):
+        mean, n = scores.get(tag, (None, 0))
+        prev = old.get(tag, {})
+        models.append({
+            "tag": tag,
+            "base": BASE["7b"] if "-7b-" in tag else "Qwen2.5-14B-Instruct",
+            "quant": "q4_K_M",
+            "size_gb": size,
+            "served_ppl": round(float(ppl[tag]), 3) if tag in ppl else None,
+            "judge_mean": mean,
+            "judge_n": n,
+            "huggingface": f"{HF[tag]}-GGUF" if tag in HF else None,
+            "lora": f"{HF[tag]}-lora" if tag in HF else None,
+            "note": prev.get("note"),
+        })
+
+    serve_cfg = Path(os.path.expanduser("~/.kannaka-brain-serve/config.toml"))
+    serving = None
+    if serve_cfg.exists():
+        for line in serve_cfg.read_text(encoding="utf-8").splitlines():
+            if line.strip().startswith("model") and "kannaka-brain" in line:
+                serving = line.split("=", 1)[1].strip().strip('"')
+    out = {
+        "$comment": (old.get("$comment") if isinstance(old, dict) and "$comment" in old else None) or
+                    "Served brain tags with the numbers that justify them. Regenerated by scripts/export-brain-registry.py on the lab box.",
+        "exported": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "judge_run": run,
+        "serving": serving or "kannaka-brain-7b-v1",
+        "reported_family": "kannaka-brain",
+        "models": models,
+    }
+    json.dump(out, sys.stdout, indent=2)
+    sys.stdout.write("\n")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

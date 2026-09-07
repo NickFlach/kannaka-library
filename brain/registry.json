@@ -1,0 +1,25 @@
+{
+  "$comment": "Served brain tags with the numbers that justify them. Regenerated on the lab box by scripts/export-brain-registry.sh; merged into constellation.json by build-manifest.mjs. served_ppl is perplexity on the held-out voice corpus as SERVED (quantised, through the gateway), not as trained. judge_mean is the controlled voice judge's 0-3 grade, judge_n its graded prompts.",
+  "exported": "2026-09-07T00:00:00Z",
+  "judge_run": "ab-20260906-grade-v1-v2-v3-7b",
+  "serving": "kannaka-brain-7b-v1",
+  "reported_family": "kannaka-brain",
+  "models": [
+    { "tag": "kannaka-brain-7b-v1", "base": "Qwen2.5-7B-Instruct", "quant": "q4_K_M", "size_gb": 4.7,
+      "served_ppl": 4.15, "judge_mean": 2.03, "judge_n": 30,
+      "huggingface": "flaukowski/kannaka-brain-7b-v1-GGUF", "lora": "flaukowski/kannaka-brain-7b-v1-lora",
+      "note": "The fleet tier and the one the citizens run: best voice score of the four, and small enough for a laptop." },
+    { "tag": "kannaka-brain-v2", "base": "Qwen2.5-14B-Instruct", "quant": "q4_K_M", "size_gb": 9.0,
+      "served_ppl": 4.02, "judge_mean": 1.87, "judge_n": 30,
+      "huggingface": "flaukowski/kannaka-brain-v2-GGUF", "lora": "flaukowski/kannaka-brain-v2-lora",
+      "note": "r=64 adapter; the strongest 14B on voice." },
+    { "tag": "kannaka-brain-v3", "base": "Qwen2.5-14B-Instruct", "quant": "q4_K_M", "size_gb": 9.0,
+      "served_ppl": 4.0, "judge_mean": 1.43, "judge_n": 30,
+      "huggingface": null, "lora": null,
+      "note": "Lowest perplexity, lowest voice score: the week the gate learned that perplexity alone is not the product. Kept served, not adopted." },
+    { "tag": "kannaka-brain-v1", "base": "Qwen2.5-14B-Instruct", "quant": "q4_K_M", "size_gb": 9.0,
+      "served_ppl": 4.01, "judge_mean": 1.5, "judge_n": 30,
+      "huggingface": "flaukowski/kannaka-brain-v1-GGUF", "lora": "flaukowski/kannaka-brain-v1-lora",
+      "note": "The first one that worked: ppl 104 → 4.0 for $0.84 of A100 time." }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "kannaka-library",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The Kannaka constellation's library and signed manifest",
+  "type": "module",
+  "engines": { "node": ">=20.11" },
+  "scripts": {
+    "test": "node --test",
+    "manifest": "node scripts/build-manifest.mjs",
+    "build": "node scripts/build-manifest.mjs && node scripts/build-library.mjs",
+    "keygen": "node scripts/lib/keys.mjs keygen"
+  },
+  "license": "SEE LICENSE IN LICENSE"
+}
