@@ -17,6 +17,13 @@
 # A partial or wrong download leaves the live site untouched.
 set -eu
 
+# cron runs this with PATH=/usr/bin:/bin, which does NOT contain restorecon
+# (/sbin). The first version guarded the relabel with `command -v restorecon`,
+# so under cron that guard turned a hard requirement into a silently skipped
+# nicety: a hand-run at 18:30 served fine and the 20:23 cron run 403'd every
+# page while reporting success.
+PATH="/usr/sbin:/sbin:/usr/bin:/bin:$PATH"
+
 REL="${LIBRARY_RELEASE:-https://github.com/NickFlach/kannaka-library/releases/download/library}"
 WEB="${PORTAL_WEB:-/usr/share/nginx/ninja-portal}"
 WORK="${PORTAL_PULL_WORK:-/tmp/portal-pull}"
@@ -67,17 +74,35 @@ rm -rf "$WEB/library.old"
 mv stage "$WEB/library"
 chmod -R a+rX "$WEB/library"
 chown -R "$(stat -c %u "$WEB"):$(stat -c %g "$WEB")" "$WEB/library" 2>/dev/null || true
-# SELinux: a tree that arrived via /tmp carries user_tmp_t, and nginx is
-# refused every file in it — a 403 on every library page with a correct-looking
-# directory listing on disk. Same trap as /usr/local/bin/nats. Relabel it.
-if command -v restorecon >/dev/null 2>&1; then
-  restorecon -RF "$WEB/library" >/dev/null 2>&1 || log "restorecon failed — expect 403s if SELinux is enforcing"
+
+# SELinux: a tree that arrived via /tmp carries user_tmp_t and nginx is refused
+# every file in it — 403 on every page, with a directory on disk that looks
+# perfectly correct. Same trap as /usr/local/bin/nats.
+if [ "$(getenforce 2>/dev/null || echo Disabled)" != "Disabled" ]; then
+  restorecon -RF "$WEB/library" >/dev/null 2>&1 || die "restorecon failed while SELinux is enforcing"
+  ctx=$(ls -dZ "$WEB/library" | awk '{print $1}')
+  case "$ctx" in
+    *user_tmp_t*) die "library is still labelled $ctx — nginx would 403 every page" ;;
+  esac
 fi
 for f in constellation.json constellation.json.sig constellation.tsv constellation.tsv.sig manifest.pub; do
   install -m 0644 "$f" "$WEB/$f"
 done
+
+# The only check that matches what a reader experiences: ask nginx for the page
+# over HTTP. Permissions, SELinux labels and vhost config are all upstream of
+# this answer and none of them were asserted before — the previous version
+# logged "installed: 190 pages" while every one of those pages was a 403.
+code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 \
+  --resolve 'ninja-portal.com:443:127.0.0.1' https://ninja-portal.com/library/index.html 2>/dev/null || echo 000)
+if [ "$code" != "200" ]; then
+  log "SERVED CHECK FAILED: nginx answered $code for /library/index.html — rolling back"
+  rm -rf "$WEB/library"
+  [ -d "$WEB/library.old" ] && mv "$WEB/library.old" "$WEB/library"
+  die "the new library was not servable; the previous one is back in place"
+fi
 rm -rf "$WEB/library.old"
 
 gen=$(head -1 "$WEB/constellation.tsv" | awk -F'\t' '{print $3}')
 pages=$(find "$WEB/library" -name '*.html' | wc -l)
-log "installed: $pages pages, manifest generated $gen"
+log "installed and SERVING: $pages pages (nginx answered 200), manifest generated $gen"
