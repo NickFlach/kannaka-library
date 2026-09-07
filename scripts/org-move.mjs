@@ -123,8 +123,23 @@ async function checkAll() {
   log(`Target organisation: ${ORG}\n`);
   const orgInfo = gh(`orgs/${ORG}`);
   if (orgInfo.__error) {
-    log(`The organisation does not exist yet (${orgInfo.__error}).`);
-    log(`Create it at https://github.com/organizations/plan — github.com has no API for it.\n`);
+    const user = gh(`users/${ORG}`);
+    if (!user.__error && user.type === "User") {
+      // Measured on 2026-09-07: POST /repos/{owner}/{repo}/transfer with a USER
+      // as new_owner is accepted, and then nothing observable happens. The repo
+      // keeps its original owner and the receiving account's
+      // /user/repository_invitations stays empty — a repository transfer is not
+      // a repository invitation, and its acceptance is not in the API. So a
+      // user destination cannot be scripted; an organisation destination can,
+      // because a transfer into an org you can create repos in is immediate.
+      log(`${ORG} is a USER account, not an organisation.`);
+      log(`A transfer to a user waits for that user to accept it in a browser, and the`);
+      log(`acceptance is not exposed by the API, so this move cannot be scripted into a`);
+      log(`user account. Create an organisation (any account can own one) and use its name.\n`);
+    } else {
+      log(`The organisation does not exist yet (${orgInfo.__error}).`);
+      log(`Create it at https://github.com/organizations/plan — github.com has no API for it.\n`);
+    }
   } else {
     log(`Organisation exists: ${orgInfo.login} (${orgInfo.public_repos} public repos)\n`);
   }
