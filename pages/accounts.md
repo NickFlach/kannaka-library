@@ -17,87 +17,86 @@ Both accounts are collaborators on each other's repositories, so a plain `git pu
 
 | repository | owner | visibility | what it is |
 |---|---|---|---|
-| kannaka-memory | NickFlach | public | the HRM engine and the `kannaka` CLI |
-| kannaka-tui | NickFlach | public | terminal dashboard |
-| kannaka-plugin | NickFlach | public | installers, signing, the Claude Code plugin |
-| kannaka-constellation-marketplace | NickFlach | public | Claude Code marketplace |
-| homebrew-kannaka | NickFlach | public | Homebrew tap |
-| kannaka-radio | NickFlach | public | the station, DJ engine, Ghost Signals production |
-| kannaka-staff | NickFlach | public | agentic radio staff |
-| kannaka-cannon | NickFlach | public | video editor and voice cloner |
-| kannaka-quantum | NickFlach | public | qBraid bridge and MCP server |
+| kannaka-memory | kannaka-labs | public | the HRM engine and the `kannaka` CLI |
+| kannaka-tui | kannaka-labs | public | terminal dashboard |
+| kannaka-plugin | kannaka-labs | public | installers, signing, the Claude Code plugin |
+| kannaka-constellation-marketplace | kannaka-labs | public | Claude Code marketplace |
+| homebrew-kannaka | kannaka-labs | public | Homebrew tap |
+| kannaka-radio | kannaka-labs | public | the station, DJ engine, Ghost Signals production |
+| kannaka-staff | kannaka-labs | public | agentic radio staff |
+| kannaka-cannon | kannaka-labs | public | video editor and voice cloner |
+| kannaka-quantum | kannaka-labs | public | qBraid bridge and MCP server |
 | consciousness-core, kannaka-attention | NickFlach | public | physics engine, sparse attention |
-| ghostsignals-rs | NickFlach | public | prediction-market engine |
-| 0xSCADA | NickFlach | public | decentralized SCADA, the QE citizen's home |
+| ghostsignals-rs | kannaka-labs | public | prediction-market engine |
+| 0xSCADA | kannaka-labs | public | decentralized SCADA, the QE citizen's home |
 | kannaka-library | NickFlach | public | this library and the manifest |
-| Agent-Kax | NickFlach | private | KAX City |
-| kax-computer | NickFlach | private | signed wakes, Firecracker, the QuantumOS bridge |
-| rogue-agent | NickFlach | private | the citizen loop and the weekly trainer |
-| kannaka-grid | NickFlach | private | thegrid colony as an engine |
-| ninja-portal | NickFlach | private | the portal, the pass, the hosted brain |
-| kannaka-observatory | NickFlach | private | fleet telemetry, markets, autoresearch |
+| Agent-Kax | kannaka-labs | private | KAX City |
+| kax-computer | kannaka-labs | private | signed wakes, Firecracker, the QuantumOS bridge |
+| rogue-agent | kannaka-labs | private | the citizen loop and the weekly trainer |
+| kannaka-grid | kannaka-labs | private | thegrid colony as an engine |
+| ninja-portal | kannaka-labs | private | the portal, the pass, the hosted brain |
+| kannaka-observatory | kannaka-labs | private | fleet telemetry, markets, autoresearch |
 | nats | NickFlach | private | swarm server config and the `kannaka-nats` helper |
-| kannaka-hdl | flaukowski | public | KannakaHDL |
-| kannaka-apps | flaukowski | public | the KHDL app store, including the mind |
-| kannaka-crystal | flaukowski | public | informational materials and the crystal registry |
-| QuantumOS | flaukowski | public | the quantum-aware microkernel |
-| kannaka-buzz | flaukowski | public | hive-mind communication (maintained fork) |
+| kannaka-hdl | kannaka-labs | public | KannakaHDL |
+| kannaka-apps | kannaka-labs | public | the KHDL app store, including the mind |
+| kannaka-crystal | kannaka-labs | public | informational materials and the crystal registry |
+| QuantumOS | kannaka-labs | public | the quantum-aware microkernel |
+| kannaka-buzz | kannaka-labs | public | hive-mind communication (maintained fork) |
 | kannaka-brain-* | flaukowski (Hugging Face) | public | LoRA adapters and GGUF weights |
 
 Private repositories are listed so the map is complete. Their documents are not published here; their decisions that matter to the public surface are restated in public ADRs.
 
-## The organisation move
+## The organisation move — done, 2026-09-07
 
-The organisation is **`kannaka-labs`**. The name was free on GitHub and already
-reads as the constellation's institution rather than one of its products: the
-observatory's prediction registry files claims under Kannaka Labs today.
+The constellation lives at **`kannaka-labs`**, created by the `flaukowski`
+account with `NickFlach` added as a second owner. Twenty-four of the
+twenty-five declared repositories are in it. Every table above still lists the
+account each repository came *from*, which is now history rather than address.
 
-`scripts/org-move.mjs` runs the move. It exists because a transfer is not one
-operation with one outcome, and the parts that matter are not all documented
-together.
+### What it cost: nothing
 
-### What GitHub carries, and what it drops
-
-| | after a transfer |
+| | measured |
 |---|---|
-| clone / fetch / push over HTTPS and SSH | redirected to the new owner |
-| release download URLs | redirected |
-| issues, pull requests, wiki, stars, watchers | carried |
-| **Actions secret values** | **cannot be read back through the API at all** |
-| GitHub Pages | the site URL changes owner |
+| Actions secrets | **survived every transfer** — including the five macOS signing and notary credentials |
+| release asset URLs | 29 of 29 still resolve |
+| `raw.githubusercontent.com` old paths | still serve |
+| `git ls-remote` on old URLs | still works |
+| a full install from the original one-liner | still pins and verifies three binaries |
 
-That fourth row is the whole reason this is done one repository at a time.
-Twelve secrets live across six repositories, and five of them are the macOS
-signing certificate and notary credentials in `kannaka-plugin`. A secret that
-does not survive a transfer must be typed in again by whoever holds the
-original, and nothing can read it out first to check.
+Secret survival was the one thing that could not have been undone from a
+script, since values cannot be read back through the API. It was probed on
+`kannaka-attention` first, and confirmed again across the whole move.
 
-So the move measures instead of assuming. `--probe` records secrets,
-variables, environments, webhooks, Pages and stars, transfers one repository,
-reads all of it again, prints what was lost by name, and then tests every URL
-shape against the **old** address. It exits non-zero if anything did not
-survive.
+### Three refusals worth knowing
 
-### The order
+**A user account cannot be the destination.** Transferring to a user returns
+success and then does nothing observable: the repository keeps its owner and
+the recipient's invitation list stays empty, because a transfer is not an
+invitation and its acceptance is browser-only. An organisation destination is
+immediate.
 
-1. **Create the organisation** at [github.com/organizations/plan](https://github.com/organizations/plan). This is the only step with no API on github.com; everything after it is scripted.
-2. **Probe** with `kannaka-library`: one secret whose value is held elsewhere, a Pages site, a release, and a live consumer in the portal's puller. If anything is going to break, it breaks on the least load-bearing repository in the estate.
-3. **Move the public repositories** (19), rebuild the manifest, and walk every asset URL in it.
-4. **Move the private ones** (6) — these carry live deployments, so they follow only once the public move is proven.
-5. **Repoint what hardcodes an owner.** `sources.json` is repointed by the script; the rest is small and known: the installers' `ReleaseRepo`/`TuiRepo` defaults, their `raw.githubusercontent.com` self-URL, the `kannaka-hdl` component they pin, `claude plugin marketplace add`, the manifest's own install URLs, and the Homebrew tap's formula.
+**A pending transfer blocks the repository.** GitHub answers a second attempt
+with `422 Repository has already been taken`, which is not what it means.
+`kannaka-library` is stuck exactly this way, from the probe that established
+the rule above; it needs the pending offer cancelled in its settings page.
 
-### Two accounts, one more step
+**Membership is required before a transfer, and fails the same way.** The same
+422 appears when the transferring account is not yet a member of the
+organisation. Both the invitation and its acceptance are ordinary API calls, so
+no browser is needed for that part.
 
-Five repositories belong to `flaukowski`, where the `NickFlach` token has push
-but **not admin** — and a transfer needs admin. That account's token does have
-it. A transfer into an organisation also requires the transferring account to
-be a member of it, so `flaukowski` has to be invited from the organisation's
-People page; `scripts/org-move.mjs --join` accepts the invitation on its
-behalf.
+### The order that works
 
-### What the move does not touch
+Move first, repoint after. Rewriting an owner reference before its repository
+has moved points a live URL at a repository that does not exist yet — which is
+how the portal's puller briefly asked for a release under the new owner while
+the library was still under the old one. Its own checksum check caught that and
+put the previous copy back, and `scripts/repoint.mjs` now asks GitHub whether a
+repository has actually moved before touching any reference to it.
 
-The open weights live on **Hugging Face** under `flaukowski`, which is a
-different account system entirely. A GitHub organisation does not move them,
-the manifest links them by their full URL, and nothing in the installers
-resolves them through GitHub.
+### What the move did not touch
+
+The open weights live on **Hugging Face** under `flaukowski`, a different
+account system. The manifest lists them as bare ids that look exactly like
+GitHub repositories, and the first version of the repointer cheerfully
+redirected all six at an organisation that does not exist over there.
