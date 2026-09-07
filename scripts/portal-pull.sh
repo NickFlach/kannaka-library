@@ -24,7 +24,7 @@ set -eu
 # page while reporting success.
 PATH="/usr/sbin:/sbin:/usr/bin:/bin:$PATH"
 
-REL="${LIBRARY_RELEASE:-https://github.com/NickFlach/kannaka-library/releases/download/library}"
+REL="${LIBRARY_RELEASE:-https://github.com/kannaka-labs/kannaka-library/releases/download/library}"
 WEB="${PORTAL_WEB:-/usr/share/nginx/ninja-portal}"
 WORK="${PORTAL_PULL_WORK:-/tmp/portal-pull}"
 PUB="${MANIFEST_PUB:-/etc/ninja-portal-manifest.pub}"

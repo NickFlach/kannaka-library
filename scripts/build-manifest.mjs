@@ -30,7 +30,11 @@ async function resolveComponent(c) {
   if (c.huggingface) out.huggingface = c.huggingface.map((r) => `https://huggingface.co/${r}`);
   if (c.hosted) out.hosted = c.hosted;
   if (c.local) out.local = c.local;
-  if (!c.repo || c.private || offline) return out;
+  // A component can publish something that is not a version. This library's
+  // only tag is the rolling `library` release the portal pulls from, and
+  // reporting that as its release would put a delivery mechanism in the column
+  // installers read as "what to pin".
+  if (!c.repo || c.private || offline || c.no_release) return out;
 
   let rel = null;
   try { rel = await latestRelease(c.repo); } catch (e) { log(`${c.repo}: release lookup failed: ${e.message}`); }
@@ -139,10 +143,10 @@ async function main() {
     components,
     services: sources.services,
     installers: {
-      sh: "https://github.com/NickFlach/kannaka-plugin/releases/latest/download/install.sh",
-      ps1: "https://github.com/NickFlach/kannaka-plugin/releases/latest/download/install.ps1",
+      sh: "https://github.com/kannaka-labs/kannaka-plugin/releases/latest/download/install.sh",
+      ps1: "https://github.com/kannaka-labs/kannaka-plugin/releases/latest/download/install.ps1",
       brew: "brew install NickFlach/kannaka/kannaka",
-      claude_marketplace: "NickFlach/kannaka-constellation-marketplace",
+      claude_marketplace: "kannaka-labs/kannaka-constellation-marketplace",
     },
   };
   mkdirSync(outDir, { recursive: true });

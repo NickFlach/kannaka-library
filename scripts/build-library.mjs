@@ -86,7 +86,7 @@ function collect() {
   for (const f of readdirSync(pdir).filter((n) => n.endsWith(".md")).sort()) {
     const src = readFileSync(join(pdir, f), "utf8");
     const { meta, body } = frontMatter(src);
-    const d = { comp: { id: "library", title: "Library", layer: null }, repo: "NickFlach/kannaka-library", path: `pages/${f}`, dir: ROOT, branch: "main",
+    const d = { comp: { id: "library", title: "Library", layer: null }, repo: "kannaka-labs/kannaka-library", path: `pages/${f}`, dir: ROOT, branch: "main",
       url: f === "index.md" ? "index.html" : `wiki/${f.replace(/\.md$/, "")}.html`, meta, body, date: gitDate(ROOT, `pages/${f}`) };
     docs.push(d); byKey.set(`${d.repo}:pages/${f}`, d);
   }
@@ -140,7 +140,7 @@ function page({ url, title, body, nav = "", crumbs = [], meta = "" }) {
 <nav class="topnav"><a href="${u}index.html">Map</a><a href="${u}adr.html">ADRs</a><a href="${u}manifest.html">Manifest</a><a href="${u}wiki/distribution.html">Distribution</a><a href="${u}wiki/contributing.html">Contribute</a><a href="${sources.site.portal}">Portal ↗</a></nav>
 <form class="search" role="search" onsubmit="return false"><input id="q" type="search" placeholder="search the constellation…" autocomplete="off" aria-label="search"><div id="results" class="results" hidden></div></form></header>
 <div class="wrap"><aside class="side">${nav}</aside><main class="main">${crumb ? `<div class="crumbs">${crumb}</div>` : ""}${meta}<article class="doc">${body}</article></main></div>
-<footer class="foot">built ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC · <a href="https://github.com/NickFlach/kannaka-library">NickFlach/kannaka-library</a> · every page here has a source file on GitHub; edit it there.</footer>
+<footer class="foot">built ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC · <a href="https://github.com/kannaka-labs/kannaka-library">kannaka-labs/kannaka-library</a> · every page here has a source file on GitHub; edit it there.</footer>
 <script>${JS}</script></body></html>`;
 }
 
