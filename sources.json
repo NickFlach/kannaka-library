@@ -18,6 +18,9 @@
     { "id": "physics", "title": "Physics & Research", "blurb": "The engines underneath, and the research arms." }
   ],
   "components": [
+    { "id": "kannaka-wave", "title": "Kannaka Wave (v2)", "repo": "kannaka-labs/kannaka-wave", "layer": "memory", "kind": "source",
+      "blurb": "An AI built from the ground up on the HRM with the LLM as an organ: the archaeology of eighteen months, ADR-0001, and the pre-registered experiments.",
+      "docs": ["README.md", "docs/adr/*.md", "docs/archaeology/*.md", "docs/experiments/*.md"] },
     { "id": "kannaka", "title": "kannaka (kannaka-memory)", "repo": "kannaka-labs/kannaka-memory", "layer": "memory", "kind": "binary",
       "blurb": "The HRM memory engine and CLI: remember, recall, dream, swarm, ask.",
       "assets": ["kannaka-linux-x86_64", "kannaka-linux-aarch64", "kannaka-macos-x86_64", "kannaka-macos-aarch64", "kannaka-windows-x86_64.exe"],
