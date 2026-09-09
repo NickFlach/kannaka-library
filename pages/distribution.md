@@ -11,16 +11,16 @@ How the constellation reaches a machine, and the shape it is converging on.
 
 | surface | what it delivers | source of truth |
 |---|---|---|
-| `curl … install.sh \| sh` / `install.ps1` | the `kannaka` engine, `kannaka-tui`, `kannaka-hdl`, a Constellation Pass claim, a brain (local or hosted) | [kannaka-plugin](https://github.com/NickFlach/kannaka-plugin) installers |
+| `curl … install.sh \| sh` / `install.ps1` | the `kannaka` engine, `kannaka-tui`, `kannaka-hdl`, a Constellation Pass claim, a brain (local or hosted) | [kannaka-plugin](https://github.com/kannaka-labs/kannaka-plugin) installers |
 | Signed `.pkg` / `.msi` | the same, double-clickable; macOS signed and notarised | kannaka-plugin releases |
-| `brew install NickFlach/kannaka/kannaka` | the engine only | [homebrew-kannaka](https://github.com/NickFlach/homebrew-kannaka) |
-| Claude Code marketplace | the `kannaka` plugin family (memory, radio, cannon, staff, octo) | [kannaka-constellation-marketplace](https://github.com/NickFlach/kannaka-constellation-marketplace) |
+| `brew install NickFlach/kannaka/kannaka` | the engine only | [homebrew-kannaka](https://github.com/kannaka-labs/homebrew-kannaka) |
+| Claude Code marketplace | the `kannaka` plugin family (memory, radio, cannon, staff, octo) | [kannaka-constellation-marketplace](https://github.com/kannaka-labs/kannaka-constellation-marketplace) |
 | [ninja-portal.com](https://ninja-portal.com) | download buttons, the Constellation Pass ($5/month), the hosted brain and its keys, this library | ninja-portal (private) |
 | [ninja-portal.com/brain](https://ninja-portal.com/brain) | open weights for `ollama`, or an OpenAI-compatible endpoint at `/v1` with a free budgeted key | Hugging Face `flaukowski/kannaka-brain-*` + the gateway on the lab box |
 
 ## The manifest
 
-Every surface used to hard-code an owner and a `latest`. Now there is one signed document, [`constellation.json`](../constellation.json), built from [`sources.json`](https://github.com/NickFlach/kannaka-library/blob/main/sources.json) on every push and every night:
+Every surface used to hard-code an owner and a `latest`. Now there is one signed document, [`constellation.json`](../constellation.json), built from [`sources.json`](https://github.com/kannaka-labs/kannaka-library/blob/main/sources.json) on every push and every night:
 
 - each component's **pinned release** (tag, date, URL);
 - each asset's **download URL and sha256**, taken from the release's own sidecar;

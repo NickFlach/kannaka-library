@@ -10,8 +10,8 @@ The library has no editor. A page is a Markdown file in a constellation reposito
 ## Put the document where it belongs
 
 - **A decision** goes in the owning repository's `docs/adr/` as `ADR-NNNN-short-title.md` (or `NNNN-short-title.md`; both are recognised). Give it a `# Title` and a line that says `Status: Proposed | Accepted | Superseded | Rejected`. It appears in the [ADR index](../adr.html) with that status on the next build.
-- **A guide, runbook, or reference** for one component goes in that repository's `docs/`. Any `docs/*.md` (and `docs/adr/*.md`) of a public component is collected; some repositories list extra paths in [`sources.json`](https://github.com/NickFlach/kannaka-library/blob/main/sources.json).
-- **A cross-cutting page**, one that belongs to the constellation rather than to a repository, goes in this repository's [`pages/`](https://github.com/NickFlach/kannaka-library/tree/main/pages). Front matter `title:` and `order:` control the sidebar.
+- **A guide, runbook, or reference** for one component goes in that repository's `docs/`. Any `docs/*.md` (and `docs/adr/*.md`) of a public component is collected; some repositories list extra paths in [`sources.json`](https://github.com/kannaka-labs/kannaka-library/blob/main/sources.json).
+- **A cross-cutting page**, one that belongs to the constellation rather than to a repository, goes in this repository's [`pages/`](https://github.com/kannaka-labs/kannaka-library/tree/main/pages). Front matter `title:` and `order:` control the sidebar.
 - **A new component** is a new entry in `sources.json`: id, title, repository, layer, a one-line blurb, the release asset names if it ships binaries, and the docs globs. That is the whole registration.
 
 ## What the build does with it
@@ -27,7 +27,7 @@ Write for someone who knows the domain and did not watch the work. Say what the 
 ## Building locally
 
 ```sh
-git clone https://github.com/NickFlach/kannaka-library
+git clone https://github.com/kannaka-labs/kannaka-library
 cd kannaka-library
 node scripts/build-manifest.mjs          # resolves releases → dist/constellation.json (signed when a key is present)
 node scripts/build-library.mjs           # clones the public repos into .cache/ and renders site/

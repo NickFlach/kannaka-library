@@ -2,7 +2,7 @@
 
 The constellation, in one place: a library of every public document across the Kannaka repositories, and the signed manifest that says what the constellation currently is.
 
-- Library: https://ninja-portal.com/library/ (mirror: https://nickflach.github.io/kannaka-library/)
+- Library: https://ninja-portal.com/library/ (mirror: https://kannaka-labs.github.io/kannaka-library/)
 - Manifest: https://ninja-portal.com/constellation.json (+ `.sig`, public key `manifest.pub`)
 
 ## What is here
