@@ -7,6 +7,8 @@
 //   node scripts/org-move.mjs --org <name> --move public           transfer the public repos
 //   node scripts/org-move.mjs --org <name> --move private          transfer the private ones
 //   node scripts/org-move.mjs --org <name> --verify                every manifest URL still resolves
+//   node scripts/org-move.mjs --org <name> --list <file> ...       same, for a repo list other than
+//                                                                  sources.json (e.g. scripts/lists/spacechild-labs.json)
 //
 // Why one at a time: GitHub redirects clone, fetch, push and release-download
 // URLs after a transfer, but the guarantee is not identical for every URL
@@ -28,12 +30,19 @@ const opt = (k, d = null) => (args.includes(k) ? args[args.indexOf(k) + 1] : d);
 const has = (k) => args.includes(k);
 const ORG = opt("--org");
 if (!ORG) { console.error("--org <name> is required"); process.exit(2); }
-const sources = JSON.parse(readFileSync(join(ROOT, "sources.json"), "utf8"));
+// The repo list defaults to the constellation's sources.json. --list <file> points
+// the same machinery at another family of repositories (2026-09-08: the Space
+// Child repos moving to their own organisation); the file has the same shape,
+// `{ "components": [ { "id", "repo", "private", "kind", "hold" } ] }`, and an
+// entry with `"hold": true` is listed by --check but never moved — the
+// candidates the owner has not decided on yet.
+const LIST = opt("--list") ? join(process.cwd(), opt("--list")) : join(ROOT, "sources.json");
+const sources = JSON.parse(readFileSync(LIST, "utf8"));
 const log = (m) => console.log(m);
 
 const repos = sources.components.filter((c) => c.repo).map((c) => ({
   id: c.id, repo: c.repo, owner: c.repo.split("/")[0], name: c.repo.split("/")[1],
-  private: !!c.private, kind: c.kind,
+  private: !!c.private, kind: c.kind, hold: !!c.hold,
 }));
 
 function gh(pathname, { method = "GET", body = null, token = null, raw = false } = {}) {
@@ -150,7 +159,7 @@ async function checkAll() {
     const admin = info.permissions && info.permissions.admin;
     const canMove = admin || (r.owner === "flaukowski" && !!process.env.FLAUKOWSKI_TOKEN);
     rows.push([r.repo, info.private ? "private" : "public",
-      info.owner.login === ORG ? "ALREADY MOVED" : canMove ? "ready" : `NEEDS ${r.owner} token (admin=false)`]);
+      info.owner.login === ORG ? "ALREADY MOVED" : r.hold ? "HOLD (not decided)" : canMove ? "ready" : `NEEDS ${r.owner} token (admin=false)`]);
   }
   const w = Math.max(...rows.map((x) => x[0].length));
   for (const [a, b, c] of rows) log(`  ${a.padEnd(w)}  ${b.padEnd(8)}  ${c}`);
@@ -189,7 +198,7 @@ async function probeShapes(repo, { release = null } = {}) {
 }
 
 async function move(which) {
-  const set = repos.filter((r) => (which === "private" ? r.private : !r.private));
+  const set = repos.filter((r) => !r.hold && (which === "private" ? r.private : !r.private));
   log(`Moving ${set.length} ${which} repositories into ${ORG}.\n`);
   const moved = [];
   for (const r of set) {
@@ -201,10 +210,10 @@ async function move(which) {
     moved.push(r);
   }
   if (moved.length) {
-    log(`\nUpdating sources.json…`);
-    let raw = readFileSync(join(ROOT, "sources.json"), "utf8");
+    log(`\nUpdating ${LIST}…`);
+    let raw = readFileSync(LIST, "utf8");
     for (const r of moved) raw = raw.split(`"${r.repo}"`).join(`"${ORG}/${r.name}"`);
-    writeFileSync(join(ROOT, "sources.json"), raw);
+    writeFileSync(LIST, raw);
     log(`  ${moved.length} entries repointed. Rebuild the manifest and run --verify.`);
   }
 }
@@ -212,6 +221,7 @@ async function move(which) {
 // Every asset URL in the published manifest must still resolve after a move.
 // A redirect is fine; a 404 means something downstream is broken right now.
 async function verify() {
+  if (opt("--list")) { log("--verify checks the constellation manifest; a --list move has no manifest. Use --probe per repo."); return true; }
   const manifest = JSON.parse(readFileSync(join(ROOT, "dist", "constellation.json"), "utf8"));
   let bad = 0, n = 0;
   for (const c of manifest.components) {

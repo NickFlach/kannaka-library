@@ -1,0 +1,178 @@
+{
+  "_about": "Space Child repositories and their move into one GitHub organisation. Same shape as sources.json for scripts/org-move.mjs --list. `hold: true` = candidate the owner has not decided on; --check lists it, --move never touches it. Pitchforks repos are a separate surface and are deliberately absent.",
+  "org": "spacechild-labs",
+  "components": [
+    {
+      "id": "spacechild",
+      "repo": "NickFlach/SpaceChild",
+      "private": true,
+      "kind": "app",
+      "note": "main platform, spacechild.love (Replit)"
+    },
+    {
+      "id": "spacechild-collective",
+      "repo": "NickFlach/SpaceChildCollective",
+      "private": true,
+      "kind": "app",
+      "note": "research.spacechild.love (Replit autoscale, LIVE)"
+    },
+    {
+      "id": "space-child-dream",
+      "repo": "NickFlach/Space-Child-Dream",
+      "private": true,
+      "kind": "app",
+      "note": "dream.spacechild.love (Replit)"
+    },
+    {
+      "id": "space-child-legal-site",
+      "repo": "NickFlach/Space-Child-Legal-Site",
+      "private": true,
+      "kind": "site",
+      "note": "the license website (Replit)"
+    },
+    {
+      "id": "space-child-legal",
+      "repo": "NickFlach/space-child-legal",
+      "private": true,
+      "kind": "docs",
+      "note": "case tracking + license source (PRIVATE, sensitive)"
+    },
+    {
+      "id": "spacechild-auth",
+      "repo": "NickFlach/spacechild-auth",
+      "private": false,
+      "kind": "service",
+      "note": "auth.spacechild.love, deployed on ninjaportal from git"
+    },
+    {
+      "id": "space-child-learn",
+      "repo": "NickFlach/space-child-learn",
+      "private": true,
+      "kind": "app",
+      "note": "learn.spacechild.love (lapsed)"
+    },
+    {
+      "id": "spacechild-dev",
+      "repo": "NickFlach/SpaceChildDev",
+      "private": false,
+      "kind": "app",
+      "note": "dev.spacechild.love (Lovable)"
+    },
+    {
+      "id": "spacechild-dev-replit",
+      "repo": "NickFlach/SpaceChildDev-Replit",
+      "private": false,
+      "kind": "app",
+      "note": "earlier dev build"
+    },
+    {
+      "id": "spacechild-waitlist",
+      "repo": "NickFlach/SpaceChildWaitlist",
+      "private": true,
+      "kind": "app",
+      "note": ""
+    },
+    {
+      "id": "spacechild-antigravity",
+      "repo": "NickFlach/SpaceChild_AntiGravity",
+      "private": false,
+      "kind": "experiment",
+      "note": ""
+    },
+    {
+      "id": "spacechilddev-0a8493b3",
+      "repo": "NickFlach/spacechilddev-0a8493b3",
+      "private": true,
+      "kind": "app",
+      "note": "Replit export"
+    },
+    {
+      "id": "consciousness-hacker",
+      "repo": "NickFlach/ConsciousnessHacker",
+      "private": false,
+      "kind": "experiment",
+      "hold": true,
+      "note": "Replit team space-child; SCL applied"
+    },
+    {
+      "id": "consciousness-probe",
+      "repo": "NickFlach/ConsciousnessProbe",
+      "private": true,
+      "kind": "experiment",
+      "hold": true,
+      "note": "Replit team space-child"
+    },
+    {
+      "id": "ghostmagic",
+      "repo": "NickFlach/GhostMagic",
+      "private": true,
+      "kind": "app",
+      "hold": true,
+      "note": "Replit team space-child"
+    },
+    {
+      "id": "shinobi-ghostmagic",
+      "repo": "NickFlach/ShinobiGhostMagic",
+      "private": true,
+      "kind": "experiment",
+      "hold": true,
+      "note": "SpoonOS experiment; SCL applied"
+    },
+    {
+      "id": "space-agent",
+      "repo": "NickFlach/SpaceAgent",
+      "private": true,
+      "kind": "experiment",
+      "hold": true,
+      "note": "SCL applied"
+    },
+    {
+      "id": "space-agent-craft",
+      "repo": "NickFlach/SpaceAgentCraft",
+      "private": true,
+      "kind": "experiment",
+      "hold": true,
+      "note": "SCL applied"
+    },
+    {
+      "id": "space-agent-iteration",
+      "repo": "NickFlach/SpaceAgentIteration",
+      "private": false,
+      "kind": "experiment",
+      "hold": true,
+      "note": "SCL applied"
+    },
+    {
+      "id": "yellow-paper-space",
+      "repo": "NickFlach/YellowPaperSpace",
+      "private": false,
+      "kind": "docs",
+      "hold": true,
+      "note": ""
+    },
+    {
+      "id": "synthetic-consciousness",
+      "repo": "NickFlach/SyntheticConsciousness",
+      "private": true,
+      "kind": "experiment",
+      "hold": true,
+      "note": "SCL applied"
+    },
+    {
+      "id": "audionoise",
+      "repo": "NickFlach/AudioNoise",
+      "private": false,
+      "kind": "fork",
+      "hold": true,
+      "note": "FORK \u2014 keep upstream license; ported into Space-Child-Dream already"
+    },
+    {
+      "id": "spoon-spacechild-core",
+      "repo": "NickFlach/spoon-spacechild-core",
+      "private": false,
+      "kind": "fork",
+      "hold": true,
+      "note": "FORK"
+    }
+  ]
+}
