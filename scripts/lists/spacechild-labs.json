@@ -4,70 +4,70 @@
   "components": [
     {
       "id": "spacechild",
-      "repo": "NickFlach/SpaceChild",
+      "repo": "spacechild-labs/SpaceChild",
       "private": true,
       "kind": "app",
       "note": "main platform, spacechild.love (Replit)"
     },
     {
       "id": "spacechild-collective",
-      "repo": "NickFlach/SpaceChildCollective",
+      "repo": "spacechild-labs/SpaceChildCollective",
       "private": true,
       "kind": "app",
       "note": "research.spacechild.love (Replit autoscale, LIVE)"
     },
     {
       "id": "space-child-dream",
-      "repo": "NickFlach/Space-Child-Dream",
+      "repo": "spacechild-labs/Space-Child-Dream",
       "private": true,
       "kind": "app",
       "note": "dream.spacechild.love (Replit)"
     },
     {
       "id": "space-child-legal-site",
-      "repo": "NickFlach/Space-Child-Legal-Site",
+      "repo": "spacechild-labs/Space-Child-Legal-Site",
       "private": true,
       "kind": "site",
       "note": "the license website (Replit)"
     },
     {
       "id": "space-child-legal",
-      "repo": "NickFlach/space-child-legal",
+      "repo": "spacechild-labs/space-child-legal",
       "private": true,
       "kind": "docs",
       "note": "case tracking + license source (PRIVATE, sensitive)"
     },
     {
       "id": "spacechild-auth",
-      "repo": "NickFlach/spacechild-auth",
+      "repo": "spacechild-labs/spacechild-auth",
       "private": false,
       "kind": "service",
       "note": "auth.spacechild.love, deployed on ninjaportal from git"
     },
     {
       "id": "space-child-learn",
-      "repo": "NickFlach/space-child-learn",
+      "repo": "spacechild-labs/space-child-learn",
       "private": true,
       "kind": "app",
       "note": "learn.spacechild.love (lapsed)"
     },
     {
       "id": "spacechild-dev",
-      "repo": "NickFlach/SpaceChildDev",
+      "repo": "spacechild-labs/SpaceChildDev",
       "private": false,
       "kind": "app",
       "note": "dev.spacechild.love (Lovable)"
     },
     {
       "id": "spacechild-dev-replit",
-      "repo": "NickFlach/SpaceChildDev-Replit",
+      "repo": "spacechild-labs/SpaceChildDev-Replit",
       "private": false,
       "kind": "app",
       "note": "earlier dev build"
     },
     {
       "id": "spacechild-waitlist",
-      "repo": "NickFlach/SpaceChildWaitlist",
+      "repo": "spacechild-labs/SpaceChildWaitlist",
       "private": true,
       "kind": "app",
       "note": ""
@@ -81,7 +81,7 @@
     },
     {
       "id": "spacechilddev-0a8493b3",
-      "repo": "NickFlach/spacechilddev-0a8493b3",
+      "repo": "spacechild-labs/spacechilddev-0a8493b3",
       "private": true,
       "kind": "app",
       "note": "Replit export"
