@@ -28,8 +28,19 @@ HF = {
     "kannaka-brain-v1": "flaukowski/kannaka-brain-v1",
     "kannaka-brain-v2": "flaukowski/kannaka-brain-v2",
     "kannaka-brain-7b-v1": "flaukowski/kannaka-brain-7b-v1",
+    "kannaka-brain-27b-v1": "flaukowski/kannaka-brain-27b-v1",
 }
-BASE = {"7b": "Qwen2.5-7B-Instruct"}
+BASE = {"7b": "Qwen2.5-7B-Instruct",
+        "27b": "DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NM-DAU"}  # Apache-2.0; community merge, recipe undisclosed
+
+
+def base_for(tag: str) -> str:
+    """The base a tag was trained on, from its size marker; 14B is the unmarked original."""
+    for size, base in BASE.items():
+        if f"-{size}-" in tag:
+            return base
+    return "Qwen2.5-14B-Instruct"
+
 
 
 def served() -> dict:
@@ -101,7 +112,7 @@ def main() -> int:
         prev = old.get(tag, {})
         models.append({
             "tag": tag,
-            "base": BASE["7b"] if "-7b-" in tag else "Qwen2.5-14B-Instruct",
+            "base": base_for(tag),
             "quant": "q4_K_M",
             "size_gb": size,
             "served_ppl": round(float(ppl[tag]), 3) if tag in ppl else None,
